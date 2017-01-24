@@ -34,7 +34,9 @@ var registrationSchema = mongoose.Schema({
     eventid: String,
     paymenttxnid: String,
     paymentphoneno: String,
+    paymentstatus: String,
     arrived: Number,
+    qrcode: String,
     timestamp: String
 });
 
@@ -92,10 +94,12 @@ exports.register = function(req,res){
     var paymenttxnid = req.body.paymenttxnid;
     var paymentphoneno = req.body.paymentphoneno;
     var arrived = '0';
+    var paymentstatus = '0';
+    var qrcode = '0';
     var timestamp = new Date;
     if(phoneno&&email&&fullname&&college&&eventid){
 
-        var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,timestamp:timestamp});
+        var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
         newregistration.save(function (err, testEvent) {
           if (err) return console.error(err);
           console.log("Registered!");
@@ -172,4 +176,60 @@ exports.getregistrations = function(req,res){
         }
     })
 
+}
+
+exports.updatepaymentstatus = function(req,res){
+    var phoneno = req.params.phoneno;
+    var eventid = req.params.eventid;
+    var accesstoken = req.params.accesstoken;
+    var code = req.params.qrcode;
+    accepted=0;
+    admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
+        if(tst){
+            accepted=1;
+        }else{
+            accepted=0;
+        }
+        if (err) return console.error(err);
+    }).then(function() { 
+        if(accepted){
+            RegisterAttendee.update({phonenumber:phoneno,eventid:eventid},{paymentstatus:'1',qrcode:code},function(err,tst){
+                if(tst.n>0){
+                    res.json({ message: 'Payment Successful' });
+                }
+                else
+                    res.json({ message: 'Payment Not Successful' });
+            });
+        }else{
+            res.json({ message: 'Invalid access token' });
+        }
+    })    
+}
+
+exports.arrivalstatus = function(req,res){
+    var phoneno = req.params.phoneno;
+    var eventid = req.params.eventid;
+    var accesstoken = req.params.accesstoken;
+    var code = req.params.qrcode;
+    accepted=0;
+    admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
+        if(tst){
+            accepted=1;
+        }else{
+            accepted=0;
+        }
+        if (err) return console.error(err);
+    }).then(function() { 
+        if(accepted){
+            RegisterAttendee.update({phonenumber:phoneno,eventid:eventid,qrcode: code},{arrived:'1'},function(err,tst){
+                if(tst.n>0){
+                    res.json({ message: 'Arrival Successful' });
+                }
+                else
+                    res.json({ message: 'Arrival Not Successful' });
+            });
+        }else{
+            res.json({ message: 'Invalid access token' });
+        }
+    })         
 }
