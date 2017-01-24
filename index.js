@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 app.get('/', routes);
 app.use('/api/v1', routes);
 app.get('/*', routes);
+app.post('/*',routes);
 
 //Setting up port
 app.set('port', (process.env.PORT || 5000))
