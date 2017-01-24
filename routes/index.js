@@ -18,13 +18,10 @@ app.post('/adminregister',db.adminregister)
 
 app.post('/getAccessToken', db.getAccessToken)
 
-app.get('/registrations/:clubname/:accesstoken', function (req, res) {
-     res.json({ message: 'Under Development' }); 
-})
+//some other auth person can intrude into other clubs registrations
+app.get('/registrations/:clubname/:eventid/:accesstoken', db.getregistrations)
 
-app.post('/pay/:phonenumber/:eventid/:accesstoken', function (req, res) {
-     res.json({ message: 'Under Development' }); 
-})
+app.post('/pay/:phonenumber/:eventid/:accesstoken', db.updatepaymentstatus)
 
 app.post('/arrived/:phonenumber/:eventid/:accesstoken', function (req, res) {
      res.json({ message: 'Under Development' }); 

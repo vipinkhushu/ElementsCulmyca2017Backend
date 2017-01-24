@@ -94,6 +94,7 @@ exports.register = function(req,res){
     var arrived = '0';
     var timestamp = new Date;
     if(phoneno&&email&&fullname&&college&&eventid){
+
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,timestamp:timestamp});
         newregistration.save(function (err, testEvent) {
           if (err) return console.error(err);
@@ -142,5 +143,33 @@ exports.getAccessToken=  function (req, res) {
     }else{
         res.json({ message: 'error, some fields missing' });
     }
+}
+
+exports.getregistrations = function(req,res){
+    var clubname = req.params.clubname;
+    var token = req.params.accesstoken;
+    var eventid = req.params.eventid;
+    accepted=0;
+    admin.findOne({priviledge:clubname, token: token},function(err, tst){
+        if(tst){
+            accepted=1;
+        }else{
+            accepted=0;
+        }
+        if (err) return console.error(err);
+        console.log(accepted);
+    }).then(function() { 
+        if(accepted){
+            RegisterAttendee.find({eventid:eventid},{_id:0,__v:0},function(err,tst){
+                if(tst){
+                    res.json(tst);
+                }
+                else
+                    res.json({ message: 'No Registrations Yet' });
+            });
+        }else{
+            res.json({ message: 'Invalid username/password' });
+        }
+    })
 
 }
