@@ -42,11 +42,32 @@ username : string
 password: string
 ```
 
-Get Access Token
+Get Registration Details
 
-> `post` https://elementsculmyca2017.herokuapp.com/api/v1/getAccessToken
+> `get` https://elementsculmyca2017.herokuapp.com/api/v1/registrations/clubname/eventid/accesstoken
 
 ```sh
-username : string
-password: string
+clubname : string
+eventid : string
+accesstoken: string
+```
+Update Payment Status
+
+> `get` https://elementsculmyca2017.herokuapp.com/api/v1/pay/phonenumber/eventid/qrcode/accesstoken
+
+```sh
+phoneno : string
+eventid : string
+qrcode : string
+accesstoken: string
+```
+Update Arrival Status
+
+> `get` https://elementsculmyca2017.herokuapp.com/api/v1/arrived/phonenumber/eventid/qrcode/accesstoken
+
+```sh
+phoneno : string
+eventid : string
+qrcode : string
+accesstoken: string
 ```
