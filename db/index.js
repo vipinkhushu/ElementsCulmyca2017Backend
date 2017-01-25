@@ -221,18 +221,27 @@ exports.arrivalstatus = function(req,res){
         if (err) return console.error(err);
     }).then(function() { 
         if(accepted){
-            RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
-                if(tst.n>0){
-                    RegisterAttendee.find({qrcode:code},function(err,info){
-                        if(info.length===0) res.json({ message: 'User Doesnt Exist' });
-                        else if(info) res.json(info);
-                        if (err) return console.error(err);
-                    })
-                    //res.json({ message: 'Arrival Successful' });
+            RegisterAttendee.findOne({qrcode:code},function(err,info){
+                if(info.length===0) res.json({ message: 'QR Code Invalid' });
+                else if(info){
+                     //res.json(info);
+                     userdetails=info;
+                    if(info.paymentstatus=="1"&&info.arrived==0){
+                        RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
+                            if(tst.n>0){
+                                res.json(userdetails);
+                            }
+                            else
+                                res.json({ message: 'QR Code Invalid' });
+                        });
+                    }else if(info.paymentstatus=="0"){
+                        res.json({ message: 'Invalid access token' });
+                    }else if(info.arrived==1){
+                        res.json({ message: 'QR Code Expired, Already Arrived' });
+                    }
                 }
-                else
-                    res.json({ message: 'QR Code Invalid' });
-            });
+                if (err) return console.error(err);
+            })
         }else{
             res.json({ message: 'Invalid access token' });
         }
