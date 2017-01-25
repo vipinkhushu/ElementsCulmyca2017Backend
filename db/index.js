@@ -103,7 +103,7 @@ exports.register = function(req,res){
         newregistration.save(function (err, testEvent) {
           if (err) return console.error(err);
           console.log("Registered!");
-        });
+      });
         res.json({ message: 'Registration Successful' });
     }else{
         res.json({ message: 'error, some fields missing' });
@@ -131,7 +131,7 @@ exports.adminregister=  function (req, res) {
     newAdmin.save(function (err, testEvent) {
       if (err) return console.error(err);
       console.log("Admin Created!!");
-    });
+  });
     res.json({ message: 'Admin Created' })
 }
 
@@ -224,11 +224,11 @@ exports.arrivalstatus = function(req,res){
             RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
                 if(tst.n>0){
                     RegisterAttendee.find({qrcode:code},function(err,info){
-                            if(info.length===0) res.json({ message: 'User Doesnt Exist' });
-                            else if(info) res.json(info);
-                            if (err) return console.error(err);
+                        if(info.length===0) res.json({ message: 'User Doesnt Exist' });
+                        else if(info) res.json(info);
+                        if (err) return console.error(err);
                     })
-                    res.json({ message: 'Arrival Successful' });
+                    //res.json({ message: 'Arrival Successful' });
                 }
                 else
                     res.json({ message: 'QR Code Invalid' });
