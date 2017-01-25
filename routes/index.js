@@ -21,7 +21,7 @@ app.get('/registrations/:clubname/:eventid/:accesstoken', db.getregistrations)
 
 app.get('/pay/:phonenumber/:eventid/:qrcode/:accesstoken', db.updatepaymentstatus)
 
-app.get('/arrived/:phonenumber/:eventid/:qrcode/:accesstoken', db.arrivalstatus)
+app.get('/arrived/:qrcode/:accesstoken', db.arrivalstatus)
 
 //Not in docs
 app.get('/eventRegister',db.eventregister)

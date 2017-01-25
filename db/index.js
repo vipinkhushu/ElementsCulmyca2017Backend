@@ -207,8 +207,8 @@ exports.updatepaymentstatus = function(req,res){
 }
 
 exports.arrivalstatus = function(req,res){
-    var phoneno = req.params.phoneno;
-    var eventid = req.params.eventid;
+    //var phoneno = req.params.phoneno;
+    //var eventid = req.params.eventid;
     var accesstoken = req.params.accesstoken;
     var code = req.params.qrcode;
     accepted=0;
@@ -221,12 +221,17 @@ exports.arrivalstatus = function(req,res){
         if (err) return console.error(err);
     }).then(function() { 
         if(accepted){
-            RegisterAttendee.update({phonenumber:phoneno,eventid:eventid,qrcode: code},{arrived:'1'},function(err,tst){
+            RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
                 if(tst.n>0){
+                    RegisterAttendee.find({qrcode:code},function(err,info){
+                            if(info.length===0) res.json({ message: 'User Doesnt Exist' });
+                            else if(info) res.json(info);
+                            if (err) return console.error(err);
+                    })
                     res.json({ message: 'Arrival Successful' });
                 }
                 else
-                    res.json({ message: 'Arrival Not Successful' });
+                    res.json({ message: 'QR Code Invalid' });
             });
         }else{
             res.json({ message: 'Invalid access token' });
