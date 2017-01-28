@@ -255,7 +255,7 @@ exports.arrivalstatus = function(req,res){
         if(accepted){
             RegisterAttendee.findOne({qrcode:code},function(err,info){
                 console.log(info);
-                if(!info) res.json({ message: 'QR Code Invalid' });
+                if(!info) res.json({ error: 'QR Code Invalid' });
                 else if(info){
                      //res.json(info);
                      userdetails=info;
@@ -266,18 +266,18 @@ exports.arrivalstatus = function(req,res){
                                 res.json({ message: 'Marked as arrived' });
                             }
                             else
-                                res.json({ message: 'QR Code Invalid' });
+                                res.json({ error: 'QR Code Invalid' });
                         });
                     }else if(info.paymentstatus=="0"){
-                        res.json({ message: 'Payment Not Successful' });
+                        res.json({ error: 'Payment Not Successful' });
                     }else if(info.arrived==1){
-                        res.json({ message: 'QR Code Expired, Already Arrived' });
+                        res.json({ error: 'QR Code Expired, Already Arrived' });
                     }
                 }
                 if (err) return console.error(err);
             })
         }else{
-            res.json({ message: 'Invalid access token' });
+            res.json({ error: 'Invalid access token' });
         }
     })         
 }
