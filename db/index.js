@@ -214,7 +214,7 @@ exports.qrdetails = function(req,res){
     var code = req.params.qrcode;
     accepted=0;
     admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
-        console.log(tst);
+        //console.log(tst);
         if(tst){
             accepted=1;
         }else{
@@ -222,7 +222,7 @@ exports.qrdetails = function(req,res){
         }
         if (err) return console.error(err);
     }).then(function() { 
-        console.log('var accepted = '+accepted);
+        //console.log('var accepted = '+accepted);
         if(accepted){
             RegisterAttendee.findOne({qrcode:code},function(err,info){
                 console.log(info);
