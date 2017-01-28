@@ -263,7 +263,7 @@ exports.arrivalstatus = function(req,res){
                         RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
                             console.log(tst);
                             if(tst.n>0){
-                                res.json(userdetails);
+                                res.json({ message: 'Marked as arrived' });
                             }
                             else
                                 res.json({ message: 'QR Code Invalid' });
