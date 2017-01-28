@@ -97,6 +97,8 @@ exports.register = function(req,res){
     var paymentstatus = '0';
     var qrcode = '0';
     var timestamp = new Date;
+    console.log(req.body);
+    console.log(phoneno+email+fullname+college+eventid)
     if(phoneno&&email&&fullname&&college&&eventid){
 
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
@@ -106,6 +108,7 @@ exports.register = function(req,res){
       });
         res.json({ message: 'Registration Successful' });
     }else{
+        console.log(phoneno+email+fullname+college+eventid)
         res.json({ message: 'error, some fields missing' });
     }
 
@@ -206,13 +209,12 @@ exports.updatepaymentstatus = function(req,res){
     })    
 }
 
-exports.arrivalstatus = function(req,res){
-    //var phoneno = req.params.phoneno;
-    //var eventid = req.params.eventid;
+exports.qrdetails = function(req,res){
     var accesstoken = req.params.accesstoken;
     var code = req.params.qrcode;
     accepted=0;
     admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
+        console.log(tst);
         if(tst){
             accepted=1;
         }else{
@@ -220,14 +222,46 @@ exports.arrivalstatus = function(req,res){
         }
         if (err) return console.error(err);
     }).then(function() { 
+        console.log('var accepted = '+accepted);
         if(accepted){
             RegisterAttendee.findOne({qrcode:code},function(err,info){
+                console.log(info);
+                if(!info) res.json({ message: 'QR Code Invalid' });
+                else if(info){
+                     res.json(info);
+                }
+                if (err) return console.error(err);
+            })
+        }else{
+            res.json({ message: 'Invalid access token' });
+        }
+    })       
+}
+
+exports.arrivalstatus = function(req,res){
+    var accesstoken = req.params.accesstoken;
+    var code = req.params.qrcode;
+    accepted=0;
+    admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
+        console.log(tst);
+        if(tst){
+            accepted=1;
+        }else{
+            accepted=0;
+        }
+        if (err) return console.error(err);
+    }).then(function() { 
+        console.log('var accepted = '+accepted);
+        if(accepted){
+            RegisterAttendee.findOne({qrcode:code},function(err,info){
+                console.log(info);
                 if(!info) res.json({ message: 'QR Code Invalid' });
                 else if(info){
                      //res.json(info);
                      userdetails=info;
                     if(info.paymentstatus=="1"&&info.arrived==0){
                         RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
+                            console.log(tst);
                             if(tst.n>0){
                                 res.json(userdetails);
                             }

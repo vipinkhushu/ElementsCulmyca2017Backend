@@ -15,7 +15,8 @@
   "dependencies": {
     "express": "^4.14.0",
     "mongoose": "^4.7.7",
-    "body-parser": "^1.16.0"
+    "body-parser": "^1.16.0".
+    "exotel":"^1.0.1"
   },
   "bugs": {
     "url": "https://github.com/Manan-YMCA/ElementsCulmyca2017Backend/issues"
