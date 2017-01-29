@@ -10,6 +10,8 @@ app.get('/', function (req, res) {
 
 app.get('/eventlist',db.eventlist)
 
+app.get('/eventlist/:clubname',db.eventListByClubName)
+
 app.get('/userinfo/:phonenumber', db.userinfo)
 
 app.post('/register', db.register)
@@ -39,6 +41,8 @@ app.get('/sms',function(req,res){
     	res.send(resdata);
 	});
 })
+
+app.post('/eventUpdate/:accesstoken', db.eventUpdate)
 
 app.get('/*', function (req, res) {
      res.json({ error: 'Requested API endpoint is invalid' }); 

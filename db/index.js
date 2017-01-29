@@ -85,6 +85,14 @@ exports.eventlist = function(req,res){
     });
 }
 
+exports.eventListByClubName = function(req, res){
+    clubname = req.params.clubname;
+    Event.find({club: clubname},{__v:0},function (err, event) {
+        res.json(event);
+        if (err) return console.error(err);
+    });    
+}
+
 exports.register = function(req,res){
     var phoneno = req.body.phoneno;
     var email = req.body.email;
@@ -116,9 +124,11 @@ exports.register = function(req,res){
 
 exports.userinfo = function(req,res){
     phone = req.params.phonenumber;
-    RegisterAttendee.find({phoneno: phone},{_id:0,email:1,fullname:1,college:1,eventid:1},function (err, info) {
-        if(info.length===0) res.json({ message: 'user doesnot exist' });
-        else if(info) res.json(info);
+    RegisterAttendee.findOne({phoneno: phone},{phoneno:1,email:1,college:1,fullname:1},function (err, info) {
+        if(info)
+            res.json(info)
+        else
+            res.json({ message: 'user doesnot exist' });
         if (err) return console.error(err);
 
     });
@@ -142,7 +152,7 @@ exports.getAccessToken=  function (req, res) {
     var un = req.body.username;
     var pw = req.body.password;
     if(un&&pw){
-        admin.findOne({username: un, password: pw},{_id:0,username:0,password:0,priviledge:0,__v:0},function (err, user) {
+        admin.findOne({username: un, password: pw},{_id:0,username:0,password:0,__v:0},function (err, user) {
             if(user) res.json(user);
             else res.json({ message: 'Invalid username/password' });
             if (err) return console.error(err);
@@ -280,4 +290,37 @@ exports.arrivalstatus = function(req,res){
             res.json({ error: 'Invalid access token' });
         }
     })         
+}
+
+exports.eventUpdate = function(req, res){
+    var clubname = req.body.clubname;
+    var eventid = req.body.eventid;
+    var description = req.body.description;
+    var rules = req.body.rules;
+    var venue = req.body.venue;
+    var st = req.body.st;
+    var et = req.body.et;
+    var token = req.params.accesstoken;
+    accepted=0;
+    admin.findOne({priviledge:clubname, token: token},function(err, tst){
+        if(tst){
+            accepted=1;
+        }else{
+            accepted=0;
+        }
+        if (err) return console.error(err);
+        console.log(accepted);
+    }).then(function() { 
+        if(accepted){
+            Event.update({club:clubname, _id: eventid, },{description:description, rules: rules, venue:venue, startTime: st, endTime: et},function(err,tst){
+                if(tst.nModified==1){
+                    res.json({ message: 'Event Updated' });
+                }else{
+                    res.json({ message: 'Error! Event not updated' });
+                }
+            });
+        }else{
+            res.json({ message: 'Invalid access token' });
+        }
+    })    
 }
