@@ -250,7 +250,7 @@ exports.qrdetails = function(req,res){
 
 exports.arrivalstatus = function(req,res){
     var accesstoken = req.params.accesstoken;
-    var code = req.params.qrcode;
+    var qrcode = req.params.qrcode;
     accepted=0;
     admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
         console.log(tst);
@@ -262,30 +262,22 @@ exports.arrivalstatus = function(req,res){
         if (err) return console.error(err);
     }).then(function() { 
         console.log('var accepted = '+accepted);
-        if(accepted){
-            RegisterAttendee.findOne({qrcode:code},function(err,info){
-                console.log(info);
-                if(!info) res.json({ error: 'QR Code Invalid' });
-                else if(info){
-                     //res.json(info);
-                     userdetails=info;
-                    if(info.paymentstatus=="1"&&info.arrived==0){
-                        RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
-                            console.log(tst);
-                            if(tst.n>0){
-                                res.json({ message: 'Marked as arrived' });
-                            }
-                            else
-                                res.json({ error: 'QR Code Invalid' });
-                        });
-                    }else if(info.paymentstatus=="0"){
-                        res.json({ error: 'Payment Not Successful' });
-                    }else if(info.arrived==1){
-                        res.json({ error: 'QR Code Expired, Already Arrived' });
+        if(accepted){                         
+            res.json(info);
+            if(info.paymentstatus=="1"&&info.arrived==0){
+                RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
+                    console.log(tst);
+                    if(tst.n>0){
+                        res.json({ message: 'Marked as arrived' });
                     }
-                }
-                if (err) return console.error(err);
-            })
+                    else
+                        res.json({ error: 'QR Code Invalid' });
+                });
+            }else if(info.paymentstatus=="0"){
+                res.json({ error: 'Payment Not Successful' });
+            }else if(info.arrived==1){
+                res.json({ error: 'QR Code Expired, Already Arrived' });
+            }
         }else{
             res.json({ error: 'Invalid access token' });
         }
