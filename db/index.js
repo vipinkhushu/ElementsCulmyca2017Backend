@@ -153,7 +153,7 @@ exports.getAccessToken=  function (req, res) {
     var pw = req.body.password;
     if(un&&pw){
         admin.findOne({username: un, password: pw},{_id:0,username:0,password:0,__v:0},function (err, user) {
-            if(user) res.json(user);
+            if(user) res.json({token:user.token, priviledge: user.priviledge});
             else res.json({ message: 'Invalid username/password' });
             if (err) return console.error(err);
         });
