@@ -60,6 +60,8 @@ var api = mongoose.model('Api',apimaintainance);
 
 //Registration Route
 exports.eventregister=  function (req, res) {
+    accessToken = req.params.accesstoken;
+
     var newEvent = new Event({
         eventName: 'Pic Of The Day',
         club: 'jhalak',
@@ -119,7 +121,6 @@ exports.register = function(req,res){
         console.log(phoneno+email+fullname+college+eventid)
         res.json({ message: 'error, some fields missing' });
     }
-
 }
 
 exports.userinfo = function(req,res){
@@ -302,7 +303,7 @@ exports.eventUpdate = function(req, res){
     var et = req.body.et;
     var token = req.params.accesstoken;
     accepted=0;
-    admin.findOne({priviledge:clubname, token: token},function(err, tst){
+    admin.findOne({priviledge:'brix', token: token},function(err, tst){
         if(tst){
             accepted=1;
         }else{

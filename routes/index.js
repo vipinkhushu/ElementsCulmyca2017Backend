@@ -28,7 +28,7 @@ app.get('/getQRCodeDetails/:qrcode/:accesstoken', db.qrdetails)
 app.get('/arrived/:qrcode/:accesstoken', db.arrivalstatus)
 
 //Not in docs
-app.get('/eventRegister',db.eventregister)
+app.post('/eventRegister/:accesstoken',db.eventregister)
 
 app.post('/adminregister',db.adminregister)
 
