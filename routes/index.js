@@ -37,7 +37,7 @@ app.get('/sms',function(req,res){
 	    id   : 'rapl5', 
 	    token: '375ca3d72e5a88dc6b8c92f32ae6c3889efa6324'
 	});
-	exotel.sendSMS('09643763712', 'Hi Sumit Kumar, your number 9540974317 is now turned on and your OTP to proceed is 123.', function (err, resdata) {
+	exotel.sendSMS('07838481559', 'Hi Himani, your number 07838481559 is now turned on and your OTP to proceed is 123.', function (err, resdata) {
     	res.send(resdata);
 	});
 })

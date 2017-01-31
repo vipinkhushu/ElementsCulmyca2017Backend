@@ -60,24 +60,52 @@ var api = mongoose.model('Api',apimaintainance);
 
 //Registration Route
 exports.eventregister=  function (req, res) {
-    accessToken = req.params.accesstoken;
+    token = req.params.accesstoken;
+    eventName = req.body.eventName;
+    club = req.body.club;
+    category = req.body.category;
+    description = req.body.description;
+    rules = req.body.rules;
+    venue = req.body.venue;
+    fee= req.body.fee;
+    startTime = req.body.startTime;
+    endTime = req.body.endTime;
+    if(eventName&&club&&category&&description&&rules&&venue&&fee&&startTime&&endTime){
+            accepted=0;
+            admin.findOne({priviledge:'brix', token: token},function(err, tst){
+                if(tst){
+                    accepted=1;
+                }else{
+                    accepted=0;
+                }
+                if (err) return console.error(err);
+                console.log(accepted);
+            }).then(function() { 
+                if(accepted){
+                        var newEvent = new Event({
+                            eventName: eventName,
+                            club: club,
+                            category: category,
+                            description: description,
+                            rules: rules,
+                            venue: venue,
+                            fee: fee,
+                            startTime: startTime,
+                            endTime: endTime
+                        });
+                        newEvent.save(function (err, testEvent) {
+                          if (err) return console.error(err);
+                          console.log("Event Created!!");
+                      });
+                        res.json({ message: 'Event Created' })
+                }else{
+                    res.json({ message: 'Invalid username/password' });
+                }
+            })    
+    }else{
+        res.send({message: 'some fields missing'});
+    }
 
-    var newEvent = new Event({
-        eventName: 'Pic Of The Day',
-        club: 'jhalak',
-        category: 'photography',
-        description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate ',
-        rules: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis ',
-        venue: 'MMC',
-        fee: '30',
-        startTime: '17/03/2017 12:45 PM',
-        endTime: '17/03/2017 2:45 PM'
-    });
-    newEvent.save(function (err, testEvent) {
-      if (err) return console.error(err);
-      console.log("Event Created!!");
-  });
-    res.json({ message: 'Event Created' })
 }
 
 exports.eventlist = function(req,res){
