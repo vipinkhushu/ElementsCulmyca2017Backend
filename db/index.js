@@ -165,10 +165,10 @@ exports.userinfo = function(req,res){
 
 exports.adminregister=  function (req, res) {
     var newAdmin = new admin({
-        username: 'brix@ec2017',
-        password: 'GhCysArD',
-        priviledge: 'qr',
-        token: 'a6ee242d725498e288854f589fa3391b41dfce6e'
+        username: 'ananya@EC2017',
+        password: 'ripegrapes@171761',
+        priviledge: 'ananya',
+        token: '67158492daafd3d90dabc6113be22cd97308758f'
     });
     newAdmin.save(function (err, testEvent) {
       if (err) return console.error(err);
@@ -206,7 +206,7 @@ exports.getregistrations = function(req,res){
         console.log(accepted);
     }).then(function() { 
         if(accepted){
-            RegisterAttendee.find({eventid:eventid},{_id:0,__v:0},function(err,tst){
+            RegisterAttendee.find({eventid:eventid},{__v:0},function(err,tst){
                 if(tst){
                     res.json(tst);
                 }
