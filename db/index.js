@@ -142,7 +142,7 @@ exports.register = function(req,res){
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
             RegisterAttendee.findOne({phoneno: phone,eventid:eventid},function (err, info) {
             if(info)
-                res.json({message: user has already registered})
+                res.json({message: 'user has already registered'})
             else{
                 newregistration.save(function (err, testEvent) {
                   if (err) return console.error(err);
