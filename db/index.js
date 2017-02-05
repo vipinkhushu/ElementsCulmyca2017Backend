@@ -235,7 +235,7 @@ exports.updatepaymentstatus = function(req,res){
         if (err) return console.error(err);
     }).then(function() { 
         if(accepted){
-            RegisterAttendee.update({phonenumber:phoneno,eventid:eventid},{paymentstatus:'1',qrcode:code},function(err,tst){
+            RegisterAttendee.update({phoneno:phoneno,eventid:eventid},{paymentstatus:'1',qrcode:code},function(err,tst){
                 if(tst.n>0){
                     res.json({ message: 'Payment Successful' });
                 }
