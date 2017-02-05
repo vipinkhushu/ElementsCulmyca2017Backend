@@ -71,37 +71,37 @@ exports.eventregister=  function (req, res) {
     startTime = req.body.startTime;
     endTime = req.body.endTime;
     if(eventName&&club&&category&&description&&rules&&venue&&fee&&startTime&&endTime){
-            accepted=0;
-            admin.findOne({priviledge:'brix', token: token},function(err, tst){
-                if(tst){
-                    accepted=1;
-                }else{
-                    accepted=0;
-                }
-                if (err) return console.error(err);
-                console.log(accepted);
-            }).then(function() { 
-                if(accepted){
-                        var newEvent = new Event({
-                            eventName: eventName,
-                            club: club,
-                            category: category,
-                            description: description,
-                            rules: rules,
-                            venue: venue,
-                            fee: fee,
-                            startTime: startTime,
-                            endTime: endTime
-                        });
-                        newEvent.save(function (err, testEvent) {
-                          if (err) return console.error(err);
-                          console.log("Event Created!!");
-                      });
-                        res.json({ message: 'Event Created' })
-                }else{
-                    res.json({ message: 'Invalid username/password' });
-                }
-            })    
+        accepted=0;
+        admin.findOne({priviledge:'brix', token: token},function(err, tst){
+            if(tst){
+                accepted=1;
+            }else{
+                accepted=0;
+            }
+            if (err) return console.error(err);
+            console.log(accepted);
+        }).then(function() { 
+            if(accepted){
+                var newEvent = new Event({
+                    eventName: eventName,
+                    club: club,
+                    category: category,
+                    description: description,
+                    rules: rules,
+                    venue: venue,
+                    fee: fee,
+                    startTime: startTime,
+                    endTime: endTime
+                });
+                newEvent.save(function (err, testEvent) {
+                  if (err) return console.error(err);
+                  console.log("Event Created!!");
+              });
+                res.json({ message: 'Event Created' })
+            }else{
+                res.json({ message: 'Invalid username/password' });
+            }
+        })    
     }else{
         res.send({message: 'some fields missing'});
     }
@@ -140,11 +140,20 @@ exports.register = function(req,res){
     if(phoneno&&email&&fullname&&college&&eventid){
 
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
-        newregistration.save(function (err, testEvent) {
-          if (err) return console.error(err);
-          console.log("Registered!");
-      });
-        res.json({ message: 'Registration Successful' });
+            RegisterAttendee.findOne({phoneno: phone,eventid:eventid},function (err, info) {
+            if(info)
+                res.json({message: user has already registered})
+            else{
+                newregistration.save(function (err, testEvent) {
+                  if (err) return console.error(err);
+                    console.log("Registered!");
+                  });
+                res.json({ message: 'Registration Successful' });
+            }
+            if (err) return console.error(err);
+
+         });
+
     }else{
         console.log(phoneno+email+fullname+college+eventid)
         res.json({ message: 'error, some fields missing' });
@@ -268,10 +277,10 @@ exports.qrdetails = function(req,res){
                 console.log(info);
                 if(!info) res.json({ message: 'QR Code Invalid' });
                 else if(info){
-                     res.json(info);
-                }
-                if (err) return console.error(err);
-            })
+                   res.json(info);
+               }
+               if (err) return console.error(err);
+           })
         }else{
             res.json({ message: 'Invalid access token' });
         }
@@ -299,7 +308,7 @@ exports.arrivalstatus = function(req,res){
                 else if(info){
                      //res.json(info);
                      userdetails=info;
-                    if(info.paymentstatus=="1"&&info.arrived==0){
+                     if(info.paymentstatus=="1"&&info.arrived==0){
                         RegisterAttendee.update({qrcode: code},{arrived:'1'},function(err,tst){
                             console.log(tst);
                             if(tst.n>0){
