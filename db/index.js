@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser')
+var helper = require('sendgrid').mail;
 
 //Database Connection
 mongoose.connect('mongodb://manan:VipinVipul321@ds017175.mlab.com:17175/elements-culmyca-2017');
@@ -140,19 +141,19 @@ exports.register = function(req,res){
     if(phoneno&&email&&fullname&&college&&eventid){
 
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
-            RegisterAttendee.findOne({phoneno: phone,eventid:eventid},function (err, info) {
+        RegisterAttendee.findOne({phoneno: phone,eventid:eventid},function (err, info) {
             if(info)
                 res.json({message: 'user has already registered'})
             else{
                 newregistration.save(function (err, testEvent) {
                   if (err) return console.error(err);
-                    console.log("Registered!");
-                  });
+                  console.log("Registered!");
+              });
                 res.json({ message: 'Registration Successful' });
             }
             if (err) return console.error(err);
 
-         });
+        });
 
     }else{
         console.log(phoneno+email+fullname+college+eventid)
@@ -277,10 +278,10 @@ exports.qrdetails = function(req,res){
                 console.log(info);
                 if(!info) res.json({ message: 'QR Code Invalid' });
                 else if(info){
-                   res.json(info);
-               }
-               if (err) return console.error(err);
-           })
+                 res.json(info);
+             }
+             if (err) return console.error(err);
+         })
         }else{
             res.json({ message: 'Invalid access token' });
         }
@@ -362,4 +363,23 @@ exports.eventUpdate = function(req, res){
             res.json({ message: 'Invalid access token' });
         }
     })    
+}
+
+exports.sendEmail = function(req, res){
+    from_email = new helper.Email("help@elementsculmyca.com","Elements Culmyca 2017")
+    to_email = new helper.Email("vipinkhushu@hotmail.com")
+    subject = "Congratulation! You have been registered"
+    content = new helper.Content("text/html", "hello")
+    mail = new helper.Mail(from_email, subject, to_email, content)
+
+    var sg = require('sendgrid')('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');
+    var request = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: mail.toJSON()
+    });
+
+    sg.API(request, function(error, response) {
+        res.json(response);
+    })
 }
