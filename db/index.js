@@ -124,6 +124,14 @@ exports.eventListByClubName = function(req, res){
     });    
 }
 
+exports.eventListByCategory = function(req, res){
+    name = req.params.name;
+     Event.find({category: name},{__v:0},function (err, event) {
+        res.json(event);
+        if (err) return console.error(err);
+    });     
+}
+
 exports.register = function(req,res){
     var phoneno = req.body.phoneno;
     var email = req.body.email;
@@ -382,4 +390,8 @@ exports.sendEmail = function(req, res){
     sg.API(request, function(error, response) {
         res.json(response);
     })
+}
+
+exports.pdf = function(req, res){
+    
 }

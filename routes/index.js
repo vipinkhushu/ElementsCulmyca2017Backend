@@ -18,6 +18,7 @@ app.get('/', function (req, res) {
 //Open APIS
 app.get('/eventlist',db.eventlist)
 app.get('/eventlist/:clubname',db.eventListByClubName)
+app.get('/eventlist/category/:name',db.eventListByCategory)
 app.get('/userinfo/:phonenumber', db.userinfo)
 app.post('/register', db.register)
 app.post('/getAccessToken', db.getAccessToken)
@@ -46,7 +47,7 @@ app.get('/sms',function(req,res){
 })
 
 app.get('/email',db.sendEmail)
-
+app.get('/pdf', db.pdf)
 //Miscellaneous APIS
 app.get('/*', function (req, res) {
 	res.json({ error: 'Requested API endpoint is invalid' }); 
