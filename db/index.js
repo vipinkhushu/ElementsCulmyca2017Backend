@@ -181,6 +181,18 @@ exports.userinfo = function(req,res){
     });
 }
 
+exports.registrationdetails = function(req, res){
+    phone = req.params.phonenumber;
+    RegisterAttendee.find({phoneno: phone},{_id:0, phoneno:0, fullname:0, email:0, college:0, __v:0},function (err, info) {
+        if(info)
+            res.json(info)
+        else
+            res.json({ message: 'user doesnot exist' });
+        if (err) return console.error(err);
+
+    });
+}
+
 exports.adminregister=  function (req, res) {
     var newAdmin = new admin({
         username: 'ananya@EC2017',

@@ -22,6 +22,7 @@ app.get('/eventlist/category/:name',db.eventListByCategory)
 app.get('/userinfo/:phonenumber', db.userinfo)
 app.post('/register', db.register)
 app.post('/getAccessToken', db.getAccessToken)
+app.get('/registrationdetails/:phonenumber', db.registrationdetails)
 
 //Secured APIS
 //BUG: some other auth person can intrude into other clubs registrations
