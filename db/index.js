@@ -301,7 +301,7 @@ exports.qrdetails = function(req,res){
                         if(!detail){
                             res.json({message: 'Cross login not authorized'});
                         }else{
-                            res.json(detail);
+                            res.json(info);
                         }
                     })
                 }
