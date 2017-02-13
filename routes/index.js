@@ -6,7 +6,8 @@ var bodyParser = require('body-parser')
 var app = express()
 //Import database module
 var db=require('./../db');
-
+//Path for static files
+app.use(express.static('public'))
 
 //Defining routes
 
@@ -49,6 +50,7 @@ app.get('/sms',function(req,res){
 
 app.get('/email',db.sendEmail)
 app.get('/pdf', db.pdf)
+
 //Miscellaneous APIS
 app.get('/*', function (req, res) {
 	res.json({ error: 'Requested API endpoint is invalid' }); 

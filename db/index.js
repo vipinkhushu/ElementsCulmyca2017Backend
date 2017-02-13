@@ -283,23 +283,28 @@ exports.qrdetails = function(req,res){
     var accesstoken = req.params.accesstoken;
     var code = req.params.qrcode;
     accepted=0;
-    admin.findOne({priviledge:'brix', token: accesstoken},function(err, tst){
-        //console.log(tst);
+    auth="";
+    admin.findOne({token: accesstoken},function(err, tst){
         if(tst){
+            auth=tst;
             accepted=1;
         }else{
             accepted=0;
         }
         if (err) return console.error(err);
     }).then(function() { 
-        //console.log('var accepted = '+accepted);
         if(accepted){
-            RegisterAttendee.findOne({qrcode:code},function(err,info){
-                console.log(info);
+         RegisterAttendee.findOne({qrcode:code},function(err,info){
                 if(!info) res.json({ message: 'QR Code Invalid' });
                 else if(info){
-                 res.json(info);
-             }
+                    Event.findOne({_id:info.eventid, club: auth.priviledge}, function(err, detail){
+                        if(!detail){
+                            res.json({message: 'Cross login not authorized'});
+                        }else{
+                            res.json(info);
+                        }
+                    })
+                }
              if (err) return console.error(err);
          })
         }else{
@@ -404,6 +409,37 @@ exports.sendEmail = function(req, res){
     })
 }
 
-exports.pdf = function(req, res){
-    
+exports.pdf = function(req, res, next){
+    var pdf = require('html-pdf');
+    var fs = require('fs');
+    var path = require('path');
+    var html = "<html><body><h1>Hello</h1><div id='pageHeader'></div></body></html>";
+    config = {format:"A4", border: "10px","header": {
+    "height": "45mm",
+    "contents": '<div style="text-align: center;">Author: Marc Bachmann</div>'
+  },
+  "footer": {
+    "height": "28mm",
+    "contents": {
+      first: 'Cover page',
+      2: 'Second page' ,
+      default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', 
+      last: 'Last Page'
+    }
+  } 
+};
+    var items = [];
+    items.push(23); 
+    async = require("async");
+    async.each(items, function(items, callback){
+            pdf.create(html, config).toFile('public/foo.pdf', function(err, res) {
+              if (err) return console.log(err);
+            });
+          callback();
+      },
+      function(err){
+        res.sendFile(path.resolve('public/foo.pdf'));
+      }
+    );
+
 }
