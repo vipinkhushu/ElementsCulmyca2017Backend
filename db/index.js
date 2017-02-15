@@ -171,7 +171,7 @@ exports.register = function(req,res){
                     console.log(updatedinfoforqr);
                     RegisterAttendee.update({phoneno: phoneno,eventid:eventid},{qrcode:updatedinfoforqr._id},function(err,tst){
                         console.log('QR alloted');
-                        request('http://localhost:5000/api/v1/deliverETicket/'+updatedinfoforqr.email+'/'+updatedinfoforqr.fullname+'/'+updatedinfoforqr._id+'/'+updatedinfoforqr.eventid, function (error, response, body) {
+                        request('http://elementsculmyca2017.herokuapp.com/api/v1/deliverETicket/'+updatedinfoforqr.email+'/'+updatedinfoforqr.fullname+'/'+updatedinfoforqr._id+'/'+updatedinfoforqr.eventid, function (error, response, body) {
                           if (!error && response.statusCode == 200) {
                             console.log(body);
                         }else{
@@ -480,7 +480,7 @@ exports.sendETicket = function(req, res){
         '              <tr>'+
         '                <td valign="top" style="width:540px;background-color:#f2f2f2;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:0px 30px 20px 30px;line-height:20px">'+
         '                  <span style="font-weight:bold;font-size:20px">Hello '+req.params.fullname+'</span>'+
-        '                  <br>You have successfully registered for the event.<br/><br/>Download PDF of your ticket, <a href="http://localhost:5000/api/v1/pdf/'+req.params.qrcode+'">Click here</a></td>'+
+        '                  <br>You have successfully registered for the event.<br/><br/>Download PDF of your ticket, <a href="http://elementsculmyca2017.herokuapp.com/api/v1/pdf/'+req.params.qrcode+'">Click here</a></td>'+
         '                </tr>'+
         '                <tr>'+
         '                  <td valign="top">'+
