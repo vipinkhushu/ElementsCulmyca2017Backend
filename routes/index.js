@@ -1,9 +1,15 @@
 //Import All Required Node Modules
 var express = require('express')
 var bodyParser = require('body-parser')
+var ga = require('node-ga');
 
 //Initialize and express app
 var app = express()
+app.use(express.cookieParser());
+app.use(ga('UA-92029222-1', {
+    safe: true
+}));
+
 //Import database module
 var db=require('./../db');
 //Path for static files
@@ -25,6 +31,7 @@ app.post('/register', db.register)
 app.post('/getAccessToken', db.getAccessToken)
 app.get('/registrationdetails/:phonenumber', db.registrationdetails)
 app.get('/deliverETicket/:email/:fullname/:qrcode/:eventid',db.sendETicket)
+app.get('/pdf/:qrcode', db.pdf)
 
 //Secured APIS
 //BUG: some other auth person can intrude into other clubs registrations

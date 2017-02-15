@@ -21,7 +21,8 @@
     "sendgrid":"^4.7.1",
     "html-pdf":"^2.1.0",
     "path":"^0.12.7",
-    "request":"^2.79.0"
+    "request":"^2.79.0",
+    "node-ga":"^0.1.1"
   },
   "bugs": {
     "url": "https://github.com/Manan-YMCA/ElementsCulmyca2017Backend/issues"
