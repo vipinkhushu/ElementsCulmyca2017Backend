@@ -24,6 +24,7 @@ app.get('/userinfo/:phonenumber', db.userinfo)
 app.post('/register', db.register)
 app.post('/getAccessToken', db.getAccessToken)
 app.get('/registrationdetails/:phonenumber', db.registrationdetails)
+app.get('/deliverETicket/:email/:fullname/:qrcode/:eventid',db.sendETicket)
 
 //Secured APIS
 //BUG: some other auth person can intrude into other clubs registrations
@@ -48,8 +49,7 @@ app.get('/sms',function(req,res){
 	});
 })
 
-app.get('/email',db.sendEmail)
-app.get('/pdf', db.pdf)
+app.get('/pdf/:qrcode', db.pdf)
 
 //Miscellaneous APIS
 app.get('/*', function (req, res) {
