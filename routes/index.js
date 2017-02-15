@@ -1,11 +1,12 @@
 //Import All Required Node Modules
 var express = require('express')
 var bodyParser = require('body-parser')
-var ga = require('node-ga');
+var ga = require('node-ga')
+var cookieParser = require('cookie-parser')
 
 //Initialize and express app
 var app = express()
-app.use(express.cookieParser());
+app.use(cookieParser());
 app.use(ga('UA-92029222-1', {
     safe: true
 }));
