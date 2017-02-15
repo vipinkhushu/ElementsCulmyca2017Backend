@@ -193,7 +193,7 @@ exports.register = function(req,res){
     }).then(function(){
 
         from_email = new helper.Email("manantechnosurge@gmail.com","Elements Culmyca 2017")
-        to_email = new helper.Email(req.params.email)
+        to_email = new helper.Email(updatedinfoforqr.email)
         subject = "Congratulations! You have been registered"
 
 
@@ -238,7 +238,7 @@ exports.register = function(req,res){
         '              <tr>'+
         '                <td valign="top" style="width:540px;background-color:#f2f2f2;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:0px 30px 20px 30px;line-height:20px">'+
         '                  <span style="font-weight:bold;font-size:20px">Hello '+updatedinfoforqr.fullname+'</span>'+
-        '                  <br>You have successfully registered for the event.<br/><br/>Download PDF of your ticket, <a href="http://elementsculmyca2017.herokuapp.com/api/v1/pdf/'+req.params.qrcode+'">Click here</a></td>'+
+        '                  <br>You have successfully registered for the event.<br/><br/>Download PDF of your ticket, <a href="http://elementsculmyca2017.herokuapp.com/api/v1/pdf/'+updatedinfoforq.qrcode+'">Click here</a></td>'+
         '                </tr>'+
         '                <tr>'+
         '                  <td valign="top">'+
