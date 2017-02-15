@@ -401,7 +401,9 @@ exports.register = function(req,res){
         });
 
         sg.API(request, function(error, response) {
-            console.log(response);
+              console.log(response.statusCode);
+              console.log(response.body);
+              console.log(response.headers);
         })
     })
                         //EMAIL MODULE ENDS
