@@ -7,9 +7,9 @@ var cookieParser = require('cookie-parser')
 //Initialize and express app
 var app = express()
 app.use(cookieParser());
-/*app.use(ga('UA-92029222-1', {
+app.use(ga('UA-92029222-1', {
     safe: true
-}));*/
+}));
 
 //Import database module
 var db=require('./../db');
@@ -58,7 +58,7 @@ app.get('/sms',function(req,res){
 		res.send(resdata);
 	});
 })
-
+app.get('/cat', db.cat);
 //Miscellaneous APIS
 app.get('/*', function (req, res) {
 	res.json({ error: 'Requested API endpoint is invalid' }); 

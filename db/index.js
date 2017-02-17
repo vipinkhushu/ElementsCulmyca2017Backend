@@ -921,3 +921,10 @@ exports.register = function(req,res){
     res.json({ message: 'error, some fields missing' });
 }
 }
+
+exports.cat = function(req, res){
+
+    Event.distinct("category",function(err,info){
+        res.json(info);
+    })
+}
