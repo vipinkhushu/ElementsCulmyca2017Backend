@@ -342,6 +342,7 @@ exports.eventUpdate = function(req, res){
     var venue = req.body.venue;
     var st = req.body.st;
     var et = req.body.et;
+    var fee = req.body.fee;
     var token = req.params.accesstoken;
     accepted=0;
     admin.findOne({priviledge:'brix', token: token},function(err, tst){
@@ -354,7 +355,7 @@ exports.eventUpdate = function(req, res){
         console.log(accepted);
     }).then(function() { 
         if(accepted){
-            Event.update({club:clubname, _id: eventid, },{description:description, rules: rules, venue:venue, startTime: st, endTime: et},function(err,tst){
+            Event.update({club:clubname, _id: eventid, },{description:description, rules: rules, venue:venue, startTime: st, endTime: et, fee:fee},function(err,tst){
                 if(tst.nModified==1){
                     res.json({ message: 'Event Updated' });
                 }else{
