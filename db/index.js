@@ -28,7 +28,8 @@ var eventsSchema = mongoose.Schema({
     venue: String,
     fee: String,
     startTime: String,
-    endTime: String
+    endTime: String,
+    type: String
 });
 
 var registrationSchema = mongoose.Schema({
@@ -77,7 +78,8 @@ exports.eventregister=  function (req, res) {
     fee= req.body.fee;
     startTime = req.body.startTime;
     endTime = req.body.endTime;
-    if(eventName&&club&&category&&description&&rules&&venue&&fee&&startTime&&endTime){
+    type = req.body.type;
+    if(eventName&&club&&category&&description&&rules&&venue&&fee&&startTime&&endTime&&type){
         accepted=0;
         admin.findOne({priviledge:'brix', token: token},function(err, tst){
             if(tst){
@@ -98,7 +100,8 @@ exports.eventregister=  function (req, res) {
                     venue: venue,
                     fee: fee,
                     startTime: startTime,
-                    endTime: endTime
+                    endTime: endTime,
+                    type: type
                 });
                 newEvent.save(function (err, testEvent) {
                   if (err) return console.error(err);
@@ -344,6 +347,7 @@ exports.eventUpdate = function(req, res){
     var et = req.body.et;
     var fee = req.body.fee;
     var token = req.params.accesstoken;
+    var type = req.body.type;
     accepted=0;
     admin.findOne({priviledge:'brix', token: token},function(err, tst){
         if(tst){
@@ -355,7 +359,7 @@ exports.eventUpdate = function(req, res){
         console.log(accepted);
     }).then(function() { 
         if(accepted){
-            Event.update({club:clubname, _id: eventid, },{description:description, rules: rules, venue:venue, startTime: st, endTime: et, fee:fee},function(err,tst){
+            Event.update({club:clubname, _id: eventid, },{description:description, rules: rules, venue:venue, startTime: st, endTime: et, fee:fee, type: type},function(err,tst){
                 if(tst.nModified==1){
                     res.json({ message: 'Event Updated' });
                 }else{
