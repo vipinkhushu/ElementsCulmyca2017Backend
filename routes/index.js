@@ -3,6 +3,7 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var ga = require('node-ga')
 var cookieParser = require('cookie-parser')
+var request = require("request");
 
 //Initialize and express app
 var app = express()
@@ -49,14 +50,22 @@ app.post('/eventUpdate/:accesstoken', db.eventUpdate)
 app.post('/adminregister',db.adminregister)
 
 //Experimental APIS
-app.get('/sms',function(req,res){
-	var exotel = require('exotel')({
-		id   : 'rapl5', 
-		token: '375ca3d72e5a88dc6b8c92f32ae6c3889efa6324'
-	});
-	exotel.sendSMS('07838481559', 'Hi Himani, your number 07838481559 is now turned on and your OTP to proceed is 123.', function (err, resdata) {
-		res.send(resdata);
-	});
+app.get('/otp/:phone/:key',function(req,res){
+	p_no = req.params.phone;
+	if(p_no.length==10){
+		var options = { method: 'GET',
+		  url: 'http://2factor.in/API/V1/053efa22-e848-11e6-afa5-00163ef91450/SMS/'+req.params.phone+'/'+req.params.key,
+		  body: '{}' };
+
+		request(options, function (error, response, body) {
+		  if (error) throw new Error(error);
+		  console.log(body);
+		  res.json(body);
+		});
+	}else{
+		res.json({"error":"invalid phonenumber length"})
+	}
+
 })
 app.get('/cat', db.cat);
 //Miscellaneous APIS
