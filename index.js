@@ -28,7 +28,7 @@ app.get('/*', routes);
 app.post('/*',routes);
 
 //Setting up port
-app.set('port', (process.env.PORT || 5000))
+app.set('port', (process.env.PORT || 4000))
 
 //Spin up the server
 app.listen(app.get('port'), function() {

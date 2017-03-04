@@ -4,6 +4,7 @@ var bodyParser = require('body-parser')
 var ga = require('node-ga')
 var cookieParser = require('cookie-parser')
 var request = require("request");
+var mongoXlsx = require('mongo-xlsx');
 
 //Initialize and express app
 var app = express()
@@ -36,6 +37,9 @@ app.get('/deliverETicket/:email/:fullname/:qrcode/:eventid',db.sendETicket)
 app.get('/pdf/:qrcode', db.pdf)
 app.get('/sponsors', db.sponsors)
 app.post('/addSponsor', db.addSponsor)
+app.get('/backup', db.backup)
+app.get('/backup/events', db.eventbackup)
+app.get('/spam', db.del)
 
 //Secured APIS
 //BUG: some other auth person can intrude into other clubs registrations
@@ -68,6 +72,22 @@ app.get('/otp/:phone/:key',function(req,res){
 
 })
 app.get('/cat', db.cat);
+
+app.get('/backuptest', function(req, res){
+	var data = [ { name : "Peter", lastName : "Parker", isSpider : true } , 
+	{ name : "Remy",  lastName : "LeBeau", powers : ["kinetic cards"] }];
+
+	var model = mongoXlsx.buildDynamicModel(data);
+
+	mongoXlsx.mongoData2Xlsx(data, model, function(err, data) {
+		console.log('File saved at:', data.fullPath); 
+	});
+
+	/* Read Excel */
+	/*mongoXlsx.xlsx2MongoData("./file.xlsx", model, function(err, mongoData) {
+		console.log('Mongo data:', mongoData); 
+	});*/
+});
 //Miscellaneous APIS
 app.get('/*', function (req, res) {
 	res.json({ error: 'Requested API endpoint is invalid' }); 

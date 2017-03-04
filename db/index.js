@@ -5,6 +5,7 @@ var pdf = require('html-pdf');
 var path = require('path');
 var async = require("async");
 var request = require('request');
+var mongoXlsx = require('mongo-xlsx');
 
 //Database Connection
 mongoose.connect('mongodb://manan:VipinVipul321@ds017175.mlab.com:17175/elements-culmyca-2017');
@@ -938,4 +939,53 @@ exports.cat = function(req, res){
     Event.distinct("category",function(err,info){
         res.json(info);
     })
+}
+
+exports.backup = function(req, res){
+    data = ""
+    RegisterAttendee.find({},function(err,info){
+        data=info;
+        var model = mongoXlsx.buildDynamicModel(data);
+
+        mongoXlsx.mongoData2Xlsx(data, model, function(err, data) {
+              console.log('File saved at:', data.fullPath);
+              var fs = require('fs');
+              var file = fs.createReadStream(path.resolve(data.fullPath));
+              var stat = fs.statSync(path.resolve(data.fullPath));
+              res.setHeader('Content-Length', stat.size);
+              res.setHeader('Content-Type', 'application/vnd.ms-excel');
+              res.setHeader('Content-Disposition', 'attachment;filename=culmycaBackup.xlsx');
+              file.pipe(res); 
+              fs.unlinkSync(data.fullPath);
+        });
+
+    })    
+}
+
+exports.eventbackup = function(req, res){
+    data = ""
+    Event.find({},function(err,info){
+        data=info;
+        var model = mongoXlsx.buildDynamicModel(data);
+
+        mongoXlsx.mongoData2Xlsx(data, model, function(err, data) {
+              console.log('File saved at:', data.fullPath);
+              var fs = require('fs');
+              var file = fs.createReadStream(path.resolve(data.fullPath));
+              var stat = fs.statSync(path.resolve(data.fullPath));
+              res.setHeader('Content-Length', stat.size);
+              res.setHeader('Content-Type', 'application/vnd.ms-excel');
+              res.setHeader('Content-Disposition', 'attachment;filename=culmycaEventBackup.xlsx');
+              file.pipe(res); 
+              fs.unlinkSync(data.fullPath);
+        });
+
+    })      
+}
+
+exports.del = function(req, res){
+    /*RegisterAttendee.remove({email: "abc@abc.com"},function(err,info){
+        if(!err) res.send(info);
+        else res.send(err);
+    })*/
 }
