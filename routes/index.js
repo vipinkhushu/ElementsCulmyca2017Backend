@@ -56,16 +56,14 @@ app.post('/adminregister',db.adminregister)
 //Experimental APIS
 app.get('/otp/:phone/:key',function(req,res){
 	p_no = req.params.phone;
+	k_no = req.params.key;
 	if(p_no.length==10){
-		var options = { method: 'GET',
-		  url: 'http://2factor.in/API/V1/4712b2cb-0427-11e7-9462-00163ef91450/SMS/'+req.params.phone+'/'+req.params.key,
-		  body: '{}' };
-
-		request(options, function (error, response, body) {
-		  if (error) throw new Error(error);
-		  console.log(body);
-		  res.json(body);
-		});
+		  request.post({url:'http://2factor.in/API/V1/053efa22-e848-11e6-afa5-00163ef91450/ADDON_SERVICES/SEND/TSMS',
+		  	form: {From:'CLMYCA', To: p_no,TemplateName: 'android-otp' ,VAR1: k_no}}, 
+		  	function(err,httpResponse,body){
+		  		res.json(body);
+		  })
+	
 	}else{
 		res.json({"error":"invalid phonenumber length"})
 	}
