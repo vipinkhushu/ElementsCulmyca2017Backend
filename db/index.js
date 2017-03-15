@@ -272,13 +272,18 @@ exports.qrdetails = function(req,res){
          RegisterAttendee.findOne({qrcode:code},function(err,info){
             if(!info) res.json({ message: 'QR Code Invalid' });
             else if(info){
-                Event.findOne({_id:info.eventid, club: auth.priviledge}, function(err, detail){
-                    if(!detail){
-                        res.json({message: 'Cross login not authorized'});
-                    }else{
-                        res.json(info);
-                    }
-                })
+                if(auth.priviledge=="brix"){
+                    res.json(info);
+                }else{
+                    Event.findOne({_id:info.eventid, club: auth.priviledge}, function(err, detail){
+                        if(!detail){
+                            res.json({message: 'Cross login not authorized'});
+                        }else{
+                            res.json(info);
+                        }
+                    })
+                }
+
             }
             if (err) return console.error(err);
         })
