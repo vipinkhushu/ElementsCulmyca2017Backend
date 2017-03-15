@@ -248,8 +248,6 @@ exports.updatepaymentstatus = function(req,res){
                 else
                     res.json({ message: 'Payment Not Successful' });
             });
-        }else{
-            res.json({ message: 'Invalid access token' });
         }
     })    
 }
@@ -265,6 +263,7 @@ exports.qrdetails = function(req,res){
             accepted=1;
         }else{
             accepted=0;
+            res.json({ message: 'Invalid access token' });
         }
         if (err) return console.error(err);
     }).then(function() { 
@@ -287,9 +286,7 @@ exports.qrdetails = function(req,res){
             }
             if (err) return console.error(err);
         })
-     }else{
-        res.json({ message: 'Invalid access token' });
-    }
+     }
 })       
 }
 
