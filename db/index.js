@@ -58,7 +58,8 @@ var sponsorsSchema = mongoose.Schema({
     name: String,
     url: String,
     logo: String,
-    title: String
+    title: String,
+    rank: Number
 });
 
 //Model Setup
@@ -829,11 +830,12 @@ exports.pdf = function(req, res, next){
 exports.sponsors = function(req, res){
     sponsors.find({},function(err, info){
         res.json(info);
-    })
+    }).sort({rank:1})
 }
 
 exports.addSponsor = function(req, res){
     var Sponsors = new sponsors({
+        rank: req.body.rank,
         name: req.body.name,
         url: req.body.url,
         logo: req.body.logo,
@@ -842,6 +844,7 @@ exports.addSponsor = function(req, res){
 
     Sponsors.save(function(error, info){
         if(!error){
+            console.log(info);
             console.log({message: "sponsor added"});
             res.json({message: "sponsor added"})
         }else{
@@ -867,73 +870,53 @@ exports.register = function(req,res){
     updatedinfoforqr="";
     if(phoneno&&email&&fullname&&college&&eventid){
         var newregistration = new RegisterAttendee({ phoneno: phoneno,email: email, fullname: fullname,college: college, eventid: eventid,paymenttxnid:paymenttxnid,paymentphoneno:paymentphoneno,arrived:arrived,paymentstatus: paymentstatus,qrcode:qrcode, timestamp:timestamp});
-        RegisterAttendee.findOne({phoneno: phoneno,eventid:eventid},function (err, info) {
-            if(info)
-                res.json({message: 'user has already registered'})
-            else{
-                newregistration.save(function (err, testEvent) {
-                  if (err) return console.error(err);
-                  console.log("Registered!");
-              }).then(function(){
-                console.log('searching '+phoneno+" "+eventid);
-                RegisterAttendee.findOne({phoneno: phoneno,eventid:eventid},function (err, updatedinfo) {
-                    console.log('found '+ updatedinfo);
-                    updatedinfoforqr=updatedinfo;
+        newregistration.save(function (err, testEvent) {
+          if (err) return console.error(err);
+          console.log("Registered!"+testEvent._id);
+          updatedinfoforqr=testEvent;
+        }).then(function(){
+            console.log("Allocating qr to "+updatedinfoforqr._id);
+            RegisterAttendee.update({phoneno: phoneno,eventid:eventid},{qrcode:updatedinfoforqr._id},function(err,tst){
+                res.json({ message: 'Registration Successful' });
+                eventinfo="";
+                Event.findOne({_id: updatedinfoforqr.eventid},function(err, tst){
+                    if(!err){
+                        console.log(tst);
+                        eventinfo=tst;  
+                    }else{
+                        console.log(err);
+                    }
                 }).then(function(){
-                    console.log('updating'+phoneno+" "+eventid);
-                    RegisterAttendee.update({phoneno: phoneno,eventid:eventid},{qrcode:updatedinfoforqr._id},function(err,tst){
-                        console.log('QR alloted');
-                        console.log(updatedinfoforqr);
-                        res.json({ message: 'Registration Successful' });
-                        //SENDING EMAIL SYSTEM STARTS
-                        eventinfo="";
-                        Event.findOne({_id: updatedinfoforqr.eventid},function(err, tst){
-                            if(!err){
-                                console.log(tst);
-                                eventinfo=tst;  
-                            }else{
-                                console.log(err);
-                            }
-                        }).then(function(){
-                            console.log("---->"+eventid);
-                            if(eventid!="58a05793c973d40004cd4914"){
-                                var myvar = '<html>'+ '<head>'+ ' <title>Confirmation</title>'+ '</head>'+ '<body>'+ ' <div marginwidth="0" marginheight="0" style="font-family:Arial,sans-serif;padding:20px 0 0 0">'+ ' <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="padding:25px 0 15px 0">'+ ' <tbody><tr>'+ ' <td width="100%" valign="top">'+ ' <table cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="f2f2f2" style="min-width:600px;margin:0 auto">'+ ' <tbody>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center">'+ ' <tbody><tr>'+ ' <td valign="top" width="300" style="background-color:#1f2533;padding-top:10px">'+ ' <a href="http://www.elementsculmyca.com" style="text-decoration:none;color:#1f2533;font-weight:bold" target="_blank" >'+ ' <img src="http://www.elementsculmyca.com/images/logo.png" style="display:block;background-color:#1f2533;color:#010101;padding:10px;padding-left:30px" alt="" border="0" height="100" >'+ ' </a>'+ ' </td>'+ ' <td valign="top" width="300" style="background-color:#1f2533;color:#ffffff;font-size:14px;font-family:Arial,sans-serif;text-align:right;padding:20px 20px 0px 0px;word-spacing:1px"><span style="font-size:20px;font-weight:bold;">ELEMENTS CULMYCA\'17<br/><small>Annual cultural and technical fest</small></span><br><br>YMCA University of Science and Technology<br/>Faridabad, Haryana, India- 121006</td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center">'+ ' <tbody><tr><center>'+ ' <td valign="top" width="500" style="color:#666666;font-size:18px;font-family:Arial,sans-serif;text-align:center;padding-top: 10px;padding-bottom: 10px;line-height:20px"> <b>E-TICKET</b></td></center>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="540" style="padding-top:20px">'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" style="width:540px;background-color:#f2f2f2;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:0px 30px 20px 30px;line-height:20px">'+ ' <span style="font-weight:bold;font-size:20px">Hello '+updatedinfoforqr.fullname+'!</span>'+ ' <br>You have successfully registered for the event.<br/>To download PDF of this ticket, <a href="http://elementsculmyca2017.herokuapp.com/api/v1/pdf/'+updatedinfoforqr._id+'">Click here</a></td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="540" border="0" align="center" bgcolor="#1f2533">'+ ' <tbody><tr>'+ ' <td width="15">'+ ' </td><td width="370" valign="top" style="color:#ffffff;font-size:15px;font-family:Arial,sans-serif;text-align:left;padding:25px 10px 25px 15px;line-height:24px;border-right:1px dotted #ffffff">'+ ' '+ ' '+ ' <span style="color:#ffffff">You must carry the soft copy of this ticket with you at the event-site. Print-out for the same is not required.</span>'+ ' <br>'+ ' '+ ' </td>'+ ' <td width="140" valign="top" style="color:#ffffff;font-size:15px;font-family:Arial,sans-serif;text-align:center;padding:25px 10px 15px 10px;line-height:20px">'+ ' <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+updatedinfoforqr._id+'" alt="" width="110" height="110" border="0" >'+ ' </td>'+ ' <td width="15">'+ ' </td></tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center" bgcolor="#ffffff" style="border:1px solid #e1e5e8">'+ ' <tbody><tr>'+ ' <td width="538" valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center" bgcolor="#ffffff" style="padding:0 30px">'+ ' <tbody>'+ ' <tr>'+ ' <td valign="top" style="width:478px;background-color:#ffffff;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:10px 10px 10px 0;border-bottom:1px solid #e1e5e8">'+ ' <!--<span style="font-size:12px">ORDER SUMMARY </span>-->'+ ' </td>'+ ' </tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td width="538" valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:15px;font-family:Arial,sans-serif;text-align:left;padding:10px 10px 10px 0;border-bottom:2px dotted #bfbfbf">'+ ' <span style="font-size:14px;font-weight:bold">EVENT</span>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:right;padding:10px 0 10px 10px;border-bottom:2px dotted #bfbfbf">'+eventinfo.eventName+'</td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="538">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#1f2533;font-size:13px;font-family:Arial,sans-serif;text-align:left;padding:10px 0 10px 0">'+ ' <strong>Date</strong>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#1f2533;font-size:12px;font-family:Arial,sans-serif;text-align:right">'+ ' <br>'+ ' <strong>'+eventinfo.startTime+'</strong>'+ ' </td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="538">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;padding:10px 0 10px 0;background-color:#ffffff;color:#1f2533;font-size:13px;font-family:Arial,sans-serif;text-align:left">'+ ' <strong>Venue</strong>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#1f2533;font-size:12px;font-family:Arial,sans-serif;text-align:right;vertical-align:top">'+ ' <br>'+ ' <strong>'+eventinfo.venue+'</strong>'+ ' </td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr><br></tr>'+ ' <td valign="top" width="540" style="background-color:#ffffff">'+ ' <table cellpadding="0" cellspacing="0" width="540" border="0" align="center">'+ ' <tbody><tr>'+ ' <td valign="top" width="540" style="color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:justify;padding:30px 0 40px;line-height:20px">'+ ' <span style="font-size:12px">'+ ' <b> Download Culmyca\'17 android application to view and manage all your registrations at one place.</b>'+ ' </span>'+ ' <table>'+ ' <tr><td><img src="http://blog.timeneye.com/wp-content/uploads/2014/11/Android-app-store.png" height="70" width="250"></td>'+ ' <!--<td><img src="http://blog.timeneye.com/wp-content/uploads/2014/11/Android-app-store.png" height="70" width="250"></td>--></tr>'+ ' </table>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ''+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center" bgcolor="1F2533">'+ ' <tbody><tr>'+ ' <td valign="top" width="260" style="background-color:#1f2533;color:#49ba8e;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:20px 10px 15px 20px">For any further query<br><a href="mailto:help@elementsculmyca.com" style="text-decoration:none;color:#49ba8e;font-weight:bold" target="_blank">help@elementsculmyca.com</a><br/><a href="http://www.elementsculmyca.com" style="text-decoration:none;color:#49ba8e;font-weight:bold" target="_blank">www.elementsculmyca.com</a></td>'+ ' <td style="width:200px;vertical-align:top;background-color:#1f2533;text-align:right;padding:25px 0 15px 0">'+ ' <img src="https://ci3.googleusercontent.com/proxy/SyVYUNSQvbO4Vpaz4vI18sLBe2mw869TmO_vsG2pCeAKavB7aEfM4-d-6da_55SKmc90xda9joSORt4Lnq5JrfJ1u0uoUOkq0yze=s0-d-e1-ft#http://in.bmscdn.com/webin/emailer/helpline-phone.png" alt="helpline phone" width="18" height="20" border="0" >'+ ' </td>'+ ' <td style="width:105px;vertical-align:top;padding:25px 0 15px 10px;text-align:left;background-color:#1f2533;color:#49ba8e;line-height:14px;font-size:12px;font-weight:bold">'+ ' <a href="tel:+919643763712" style="text-decoration:none;color:#49ba8e" target="_blank">Ph: 9643763712</a>'+ ' '+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </body>'+ ' </html>'; 
-                                console.log("-->"+updatedinfoforqr);
-                                var from_email = new helper.Email('help@elementsculmyca.com','Elements Culmyca 2017');
-                                var to_email = new helper.Email(updatedinfoforqr.email);
-                                var subject = 'Registration Successful!';
-                                var content = new helper.Content("text/html", myvar);
-                                var mail = new helper.Mail(from_email, subject, to_email, content);
+                        console.log("---->"+eventid);
+                        if(eventid!="58a05793c973d40004cd4914"){
+                            var myvar = '<html>'+ '<head>'+ ' <title>Confirmation</title>'+ '</head>'+ '<body>'+ ' <div marginwidth="0" marginheight="0" style="font-family:Arial,sans-serif;padding:20px 0 0 0">'+ ' <table cellpadding="0" cellspacing="0" width="100%" border="0" align="center" style="padding:25px 0 15px 0">'+ ' <tbody><tr>'+ ' <td width="100%" valign="top">'+ ' <table cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="f2f2f2" style="min-width:600px;margin:0 auto">'+ ' <tbody>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center">'+ ' <tbody><tr>'+ ' <td valign="top" width="300" style="background-color:#1f2533;padding-top:10px">'+ ' <a href="http://www.elementsculmyca.com" style="text-decoration:none;color:#1f2533;font-weight:bold" target="_blank" >'+ ' <img src="http://www.elementsculmyca.com/images/logo.png" style="display:block;background-color:#1f2533;color:#010101;padding:10px;padding-left:30px" alt="" border="0" height="100" >'+ ' </a>'+ ' </td>'+ ' <td valign="top" width="300" style="background-color:#1f2533;color:#ffffff;font-size:14px;font-family:Arial,sans-serif;text-align:right;padding:20px 20px 0px 0px;word-spacing:1px"><span style="font-size:20px;font-weight:bold;">ELEMENTS CULMYCA\'17<br/><small>Annual cultural and technical fest</small></span><br><br>YMCA University of Science and Technology<br/>Faridabad, Haryana, India- 121006</td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center">'+ ' <tbody><tr><center>'+ ' <td valign="top" width="500" style="color:#666666;font-size:18px;font-family:Arial,sans-serif;text-align:center;padding-top: 10px;padding-bottom: 10px;line-height:20px"> <b>E-TICKET</b></td></center>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="540" style="padding-top:20px">'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" style="width:540px;background-color:#f2f2f2;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:0px 30px 20px 30px;line-height:20px">'+ ' <span style="font-weight:bold;font-size:20px">Hello '+updatedinfoforqr.fullname+'!</span>'+ ' <br>You have successfully registered for the event.<br/>To download PDF of this ticket, <a href="http://elementsculmyca2017.herokuapp.com/api/v1/pdf/'+updatedinfoforqr._id+'">Click here</a></td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="540" border="0" align="center" bgcolor="#1f2533">'+ ' <tbody><tr>'+ ' <td width="15">'+ ' </td><td width="370" valign="top" style="color:#ffffff;font-size:15px;font-family:Arial,sans-serif;text-align:left;padding:25px 10px 25px 15px;line-height:24px;border-right:1px dotted #ffffff">'+ ' '+ ' '+ ' <span style="color:#ffffff">You must carry the soft copy of this ticket with you at the event-site. Print-out for the same is not required.</span>'+ ' <br>'+ ' '+ ' </td>'+ ' <td width="140" valign="top" style="color:#ffffff;font-size:15px;font-family:Arial,sans-serif;text-align:center;padding:25px 10px 15px 10px;line-height:20px">'+ ' <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+updatedinfoforqr._id+'" alt="" width="110" height="110" border="0" >'+ ' </td>'+ ' <td width="15">'+ ' </td></tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center" bgcolor="#ffffff" style="border:1px solid #e1e5e8">'+ ' <tbody><tr>'+ ' <td width="538" valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center" bgcolor="#ffffff" style="padding:0 30px">'+ ' <tbody>'+ ' <tr>'+ ' <td valign="top" style="width:478px;background-color:#ffffff;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:10px 10px 10px 0;border-bottom:1px solid #e1e5e8">'+ ' <!--<span style="font-size:12px">ORDER SUMMARY </span>-->'+ ' </td>'+ ' </tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td width="538" valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:15px;font-family:Arial,sans-serif;text-align:left;padding:10px 10px 10px 0;border-bottom:2px dotted #bfbfbf">'+ ' <span style="font-size:14px;font-weight:bold">EVENT</span>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:right;padding:10px 0 10px 10px;border-bottom:2px dotted #bfbfbf">'+eventinfo.eventName+'</td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="538">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#1f2533;font-size:13px;font-family:Arial,sans-serif;text-align:left;padding:10px 0 10px 0">'+ ' <strong>Date</strong>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#1f2533;font-size:12px;font-family:Arial,sans-serif;text-align:right">'+ ' <br>'+ ' <strong>'+eventinfo.startTime+'</strong>'+ ' </td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' <tr>'+ ' <td valign="top" width="538">'+ ' <table cellpadding="0" cellspacing="0" width="538" border="0" align="center">'+ ' <tbody>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;padding:10px 0 10px 0;background-color:#ffffff;color:#1f2533;font-size:13px;font-family:Arial,sans-serif;text-align:left">'+ ' <strong>Venue</strong>'+ ' </td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#1f2533;font-size:12px;font-family:Arial,sans-serif;text-align:right;vertical-align:top">'+ ' <br>'+ ' <strong>'+eventinfo.venue+'</strong>'+ ' </td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' <tr>'+ ' <td style="width:30px">'+ ' </td><td valign="top" style="width:265px;background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:left;line-height:20px"></td>'+ ' <td valign="top" width="213" style="background-color:#ffffff;color:#666666;font-size:9px;font-family:Arial,sans-serif;text-align:right;vertical-align:top"></td>'+ ' <td style="width:30px">'+ ' </td></tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' <tr><br></tr>'+ ' <td valign="top" width="540" style="background-color:#ffffff">'+ ' <table cellpadding="0" cellspacing="0" width="540" border="0" align="center">'+ ' <tbody><tr>'+ ' <td valign="top" width="540" style="color:#666666;font-size:12px;font-family:Arial,sans-serif;text-align:justify;padding:30px 0 40px;line-height:20px">'+ ' <span style="font-size:12px">'+ ' <b> Download Culmyca\'17 android application to view and manage all your registrations at one place.</b>'+ ' </span>'+ ' <table>'+ ' <tr><td><img src="http://blog.timeneye.com/wp-content/uploads/2014/11/Android-app-store.png" height="70" width="250"></td>'+ ' <!--<td><img src="http://blog.timeneye.com/wp-content/uploads/2014/11/Android-app-store.png" height="70" width="250"></td>--></tr>'+ ' </table>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ''+ ' <tr>'+ ' <td valign="top">'+ ' <table cellpadding="0" cellspacing="0" width="600" border="0" align="center" bgcolor="1F2533">'+ ' <tbody><tr>'+ ' <td valign="top" width="260" style="background-color:#1f2533;color:#49ba8e;font-size:12px;font-family:Arial,sans-serif;text-align:left;padding:20px 10px 15px 20px">For any further query<br><a href="mailto:help@elementsculmyca.com" style="text-decoration:none;color:#49ba8e;font-weight:bold" target="_blank">help@elementsculmyca.com</a><br/><a href="http://www.elementsculmyca.com" style="text-decoration:none;color:#49ba8e;font-weight:bold" target="_blank">www.elementsculmyca.com</a></td>'+ ' <td style="width:200px;vertical-align:top;background-color:#1f2533;text-align:right;padding:25px 0 15px 0">'+ ' <img src="https://ci3.googleusercontent.com/proxy/SyVYUNSQvbO4Vpaz4vI18sLBe2mw869TmO_vsG2pCeAKavB7aEfM4-d-6da_55SKmc90xda9joSORt4Lnq5JrfJ1u0uoUOkq0yze=s0-d-e1-ft#http://in.bmscdn.com/webin/emailer/helpline-phone.png" alt="helpline phone" width="18" height="20" border="0" >'+ ' </td>'+ ' <td style="width:105px;vertical-align:top;padding:25px 0 15px 10px;text-align:left;background-color:#1f2533;color:#49ba8e;line-height:14px;font-size:12px;font-weight:bold">'+ ' <a href="tel:+919643763712" style="text-decoration:none;color:#49ba8e" target="_blank">Ph: 9643763712</a>'+ ' '+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </td>'+ ' </tr>'+ ' </tbody>'+ ' </table>'+ ' </td>'+ ' </tr>'+ ' </tbody></table>'+ ' </body>'+ ' </html>'; 
+                            console.log("-->"+updatedinfoforqr);
+                            var from_email = new helper.Email('help@elementsculmyca.com','Elements Culmyca 2017');
+                            var to_email = new helper.Email(updatedinfoforqr.email);
+                            var subject = 'Registration Successful!';
+                            var content = new helper.Content("text/html", myvar);
+                            var mail = new helper.Mail(from_email, subject, to_email, content);
 
-                                var sg = require('sendgrid')('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');
-                                var request = sg.emptyRequest({
-                                  method: 'POST',
-                                  path: '/v3/mail/send',
-                                  body: mail.toJSON(),
-                              });
-                                sg.API(request, function(error, response) {
-                                  console.log(response.statusCode);
-                                  console.log(response.body);
-                                  console.log(response.headers);
-                              });
-                            }else{
-                                console.log("zenith registration, no email sent");
-                            }
-
-
-                        })
-
-                        //SENDING EMAIL SYSTEM ENDS
-                    })
-})
-
-})
-}
-})
-
-}else{
+                            var sg = require('sendgrid')('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');
+                            var request = sg.emptyRequest({
+                              method: 'POST',
+                              path: '/v3/mail/send',
+                              body: mail.toJSON(),
+                          });
+                            sg.API(request, function(error, response) {
+                              console.log(response.statusCode);
+                              console.log(response.body);
+                              console.log(response.headers);
+                          });
+                        }else{
+                            console.log("zenith registration, no email sent");
+                        }
+                })
+            })
+        })
+    }else{
     res.json({ message: 'error, some fields missing' });
-}
+    }
 }
 
 exports.cat = function(req, res){
@@ -990,4 +973,13 @@ exports.del = function(req, res){
         if(!err) res.send(info);
         else res.send(err);
     })*/
+    /*RegisterAttendee.find({paymentstatus:"1"},function(err, info){
+        if(!err) res.send(info);
+        else res.send(err);
+    })*/
+    /*RegisterAttendee.update({paymentstatus:"1"}, { $set:{ "paymentstatus" : "0" } }, { multi : true },function(err, info){
+        if(!err) res.send(info);
+        else res.send(err);
+    })*/
+
 }
